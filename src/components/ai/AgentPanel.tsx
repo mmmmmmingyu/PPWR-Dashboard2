@@ -54,14 +54,13 @@ function generateResponse(query: string, lang: 'zh' | 'en'): AgentMessage {
 
   const pending = mockAnomalies.filter((a) => a.status !== 'closed').length
   const baseline = mockAnomalies.filter((a) => a.scene === 'baseline_change' && a.status !== 'closed').length
-  const shipment = mockAnomalies.filter((a) => a.scene === 'code_shipment' && a.status !== 'closed').length
 
   return {
     id,
     role: 'assistant',
     content: lang === 'zh'
-      ? `当前共有 ${pending} 条未关闭异常。主要归因：基线变更风险 ${baseline} 条（客制化需求驱动），异常发货 ${shipment} 条（切换窗口期编码混用）。建议优先处理发货异常并加速意大利区域节点交付。`
-      : `${pending} open anomalies. Main causes: ${baseline} baseline changes (customization-driven), ${shipment} shipment anomalies (code mixing during switch window). Prioritize shipment anomalies and accelerate Italy regional nodes.`,
+      ? `当前共有 ${pending} 条未关闭基线变更异常，其中待分析/处理中 ${baseline} 条。主要归因于切换窗口期客制化需求驱动的基线例外变更，建议优先闭环高影响合同与批次。`
+      : `${pending} open baseline change anomalies (${baseline} pending/in analysis). Main driver: customization during switch window. Prioritize high-impact contracts and batches.`,
     timestamp: new Date(),
   }
 }

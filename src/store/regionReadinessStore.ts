@@ -1,7 +1,7 @@
 import { create } from 'zustand'
-import { PRODUCT_SWITCH_NODES } from '../config/regulations'
-import { mockProductProgress } from '../mock/data'
-import type { BilingualText, NodeProgress, ProductCodeProgress, SwitchNode } from '../types'
+import { REGION_SWITCH_NODES } from '../config/regulations'
+import { mockCountryProgress } from '../mock/data'
+import type { BilingualText, CountryProgress, NodeProgress, SwitchNode } from '../types'
 
 function defaultNode(col: SwitchNode): NodeProgress {
   return {
@@ -13,24 +13,24 @@ function defaultNode(col: SwitchNode): NodeProgress {
   }
 }
 
-interface ProductReadinessState {
+interface RegionReadinessState {
   columns: SwitchNode[]
-  rows: ProductCodeProgress[]
+  rows: CountryProgress[]
   addColumn: (name: BilingualText, defaultDept: string) => void
   updateColumn: (id: string, patch: Partial<Pick<SwitchNode, 'name' | 'defaultDept'>>) => void
   deleteColumn: (id: string) => void
-  updateRow: (code: string, patch: Partial<Pick<ProductCodeProgress, 'industry' | 'code' | 'description'>>) => void
-  updateNode: (code: string, nodeId: string, patch: Partial<NodeProgress>) => void
+  updateRow: (country: string, patch: Partial<Pick<CountryProgress, 'office' | 'country'>>) => void
+  updateNode: (country: string, nodeId: string, patch: Partial<NodeProgress>) => void
 }
 
-let colSeq = 100
+let regionColSeq = 200
 
-export const useProductReadinessStore = create<ProductReadinessState>((set) => ({
-  columns: PRODUCT_SWITCH_NODES.map((c) => ({ ...c })),
-  rows: mockProductProgress.map((r) => ({ ...r, nodes: r.nodes.map((n) => ({ ...n })) })),
+export const useRegionReadinessStore = create<RegionReadinessState>((set) => ({
+  columns: REGION_SWITCH_NODES.map((c) => ({ ...c })),
+  rows: mockCountryProgress.map((r) => ({ ...r, nodes: r.nodes.map((n) => ({ ...n })) })),
 
   addColumn: (name, defaultDept) => {
-    const id = `col_${++colSeq}`
+    const id = `rcol_${++regionColSeq}`
     const col: SwitchNode = {
       id,
       name,
@@ -58,31 +58,28 @@ export const useProductReadinessStore = create<ProductReadinessState>((set) => (
     }))
   },
 
-  updateRow: (code, patch) => {
+  updateRow: (country, patch) => {
     set((s) => ({
-      rows: s.rows.map((r) => (r.code === code ? { ...r, ...patch } : r)),
+      rows: s.rows.map((r) => (r.country === country ? { ...r, ...patch } : r)),
     }))
   },
 
-  updateNode: (code, nodeId, patch) => {
+  updateNode: (country, nodeId, patch) => {
     set((s) => ({
       rows: s.rows.map((r) =>
-        r.code !== code
+        r.country !== country
           ? r
-          : {
-              ...r,
-              nodes: r.nodes.map((n) => (n.nodeId === nodeId ? { ...n, ...patch } : n)),
-            },
+          : { ...r, nodes: r.nodes.map((n) => (n.nodeId === nodeId ? { ...n, ...patch } : n)) },
       ),
     }))
   },
 }))
 
-export function calcReadinessFromRows(rows: ProductCodeProgress[]): number {
+export function calcRegionReadinessFromRows(rows: CountryProgress[]): number {
   let completed = 0
   let total = 0
-  rows.forEach((p) =>
-    p.nodes.forEach((n) => {
+  rows.forEach((c) =>
+    c.nodes.forEach((n) => {
       total++
       if (n.status === 'completed') completed++
     }),

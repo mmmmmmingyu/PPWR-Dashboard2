@@ -26,8 +26,15 @@ export interface KpiValue {
 }
 
 export type AnomalyStatus = 'pending' | 'analyzing' | 'closed'
-export type AnomalyScene = 'baseline_change' | 'code_shipment' | 'discontinued_code'
+export type AnomalyScene = 'baseline_change'
 export type BaselineChangeType = 'country' | 'product_code' | 'contract' | 'batch'
+
+export interface BaselineImpactDetail {
+  codes: string[]
+  contracts: { contractNo: string; country?: string }[]
+  batches: { batchNo: string; contractNo?: string }[]
+  shipments: { code: string; contractNo: string; batchNo?: string; quantity: number; shipDate?: string }[]
+}
 
 export interface AnomalyRecord {
   id: string
@@ -36,6 +43,8 @@ export interface AnomalyRecord {
   changeType?: BaselineChangeType
   /** 仅「切换对象基线例外变更风险」场景使用 */
   object?: string
+  /** 基线变更影响明细 */
+  impact?: BaselineImpactDetail
   codes: string[]
   impactScope: string
   contractNo?: string
@@ -47,11 +56,17 @@ export interface AnomalyRecord {
   docNo?: string
   assignee?: string
   reasonCategory?: string
+  /** 基线变更：变更原因 */
+  changeReason?: string
+  /** 基线变更：解决方案 */
+  solution?: string
+  /** 基线变更：处理进展 */
+  progress?: string
   status: AnomalyStatus
   createdAt: string
 }
 
-export type NodeStatus = 'not_started' | 'in_progress' | 'completed' | 'overdue'
+export type NodeStatus = 'in_progress' | 'completed' | 'overdue'
 
 export interface SwitchNode {
   id: string
@@ -81,8 +96,8 @@ export interface ProductCodeProgress {
 }
 
 export interface CountryProgress {
+  office: string
   country: string
-  region: string
   nodes: NodeProgress[]
 }
 
@@ -94,14 +109,15 @@ export interface DataQualityIssue {
   id: string
   description: string
   category: IssueCategory
-  relatedKpi: string
+  qualityMetric: string
+  metricValue?: number
   dept: string
   assignee: string
   foundDate: string
+  resolvedDate?: string
   severity: Severity
   status: IssueStatus
   progress?: string
-  currentKpiValue?: number
   isOverdue: boolean
 }
 

@@ -1,20 +1,27 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Pencil, Trash2, X } from 'lucide-react'
-import { useProductReadinessStore } from '../../store/productReadinessStore'
+import { Pencil, Trash2, X, Plus } from 'lucide-react'
 import { bt } from '../../utils/helpers'
 import { useAppStore } from '../../store/appStore'
-import type { SwitchNode } from '../../types'
+import type { BilingualText, SwitchNode } from '../../types'
+
+export interface ReadinessColumnStore {
+  columns: SwitchNode[]
+  addColumn: (name: BilingualText, defaultDept: string) => void
+  updateColumn: (id: string, patch: Partial<Pick<SwitchNode, 'name' | 'defaultDept'>>) => void
+  deleteColumn: (id: string) => void
+}
 
 interface ColumnManagerProps {
   open: boolean
   onClose: () => void
+  store: ReadinessColumnStore
 }
 
-export function ColumnManager({ open, onClose }: ColumnManagerProps) {
+export function ColumnManager({ open, onClose, store }: ColumnManagerProps) {
   const { t } = useTranslation()
   const lang = useAppStore((s) => s.language)
-  const { columns, addColumn, updateColumn, deleteColumn } = useProductReadinessStore()
+  const { columns, addColumn, updateColumn, deleteColumn } = store
   const [editing, setEditing] = useState<SwitchNode | null>(null)
   const [form, setForm] = useState({ nameZh: '', nameEn: '', defaultDept: '' })
 

@@ -12,7 +12,8 @@ export default function ProductReadiness() {
   const { t } = useTranslation()
   const lang = useAppStore((s) => s.language)
   const role = useAppStore((s) => s.role)
-  const rows = useProductReadinessStore((s) => s.rows)
+  const productStore = useProductReadinessStore()
+  const rows = productStore.rows
   const [search, setSearch] = useState('')
   const [showColumnManager, setShowColumnManager] = useState(false)
 
@@ -52,31 +53,34 @@ export default function ProductReadiness() {
         {role === 'admin' && <ColumnManagerButton onClick={() => setShowColumnManager(true)} />}
       </div>
 
-      {/* 紧凑看板 */}
-      <div className="bg-white rounded-lg border border-slate-200 px-4 py-3 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
-        <div className="flex items-center gap-3 shrink-0">
-          <div>
-            <p className="text-[10px] text-slate-400 leading-tight">{t('readiness.overallProduct')}</p>
-            <p className="text-2xl font-bold text-primary-700 tabular-nums leading-tight">{overall}%</p>
+      <div className="bg-white rounded-xl border border-slate-200 p-5 w-full max-h-[50vh]">
+        <div className="flex flex-col lg:flex-row gap-6 items-stretch max-h-[calc(50vh-2.5rem)]">
+          <div className="lg:w-48 shrink-0 flex flex-col justify-center gap-3">
+            <div>
+              <p className="text-sm text-slate-500 mb-1">{t('readiness.overallProduct')}</p>
+              <p className="text-4xl font-bold text-primary-700 tabular-nums">{overall}%</p>
+            </div>
+            <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-primary-400 to-primary-700 rounded-full transition-all"
+                style={{ width: `${overall}%` }}
+              />
+            </div>
           </div>
-          <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-primary-400 to-primary-700 rounded-full"
-              style={{ width: `${overall}%` }}
-            />
-          </div>
-        </div>
 
-        <div className="flex-1 min-w-0">
-          <p className="text-[10px] text-slate-400 mb-1">{lang === 'zh' ? '按产业准备度' : 'By Industry'}</p>
-          <ResponsiveContainer width="100%" height={56}>
-            <BarChart data={byIndustry} layout="vertical" margin={{ left: 0, right: 8, top: 0, bottom: 0 }}>
-              <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 9 }} hide />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={64} />
-              <Tooltip />
-              <Bar dataKey="value" fill="#059669" radius={[0, 3, 3, 0]} barSize={10} />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="flex-1 min-w-0 flex flex-col">
+            <p className="text-sm text-slate-500 mb-2">{lang === 'zh' ? '按产业准备度' : 'By Industry'}</p>
+            <div className="h-[min(200px,calc(50vh-10rem))]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={byIndustry} layout="vertical" margin={{ left: 0, right: 8, top: 8, bottom: 8 }}>
+                  <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11 }} />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={72} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#059669" radius={[0, 4, 4, 0]} barSize={16} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -91,13 +95,13 @@ export default function ProductReadiness() {
           />
         </div>
         {(role === 'admin' || role === 'domain_owner') && (
-          <span className="text-xs text-slate-400">{lang === 'zh' ? '点击单元格可直接编辑' : 'Click cells to edit'}</span>
+          <span className="text-xs text-slate-400">{t('readiness.clickToEdit')}</span>
         )}
       </div>
 
       <ProductReadinessTable data={filtered} />
 
-      <ColumnManager open={showColumnManager} onClose={() => setShowColumnManager(false)} />
+      <ColumnManager open={showColumnManager} onClose={() => setShowColumnManager(false)} store={productStore} />
     </div>
   )
 }

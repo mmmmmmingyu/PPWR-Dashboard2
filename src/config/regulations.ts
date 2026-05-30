@@ -180,8 +180,6 @@ export const REGION_SWITCH_NODES: SwitchNode[] = [
 
 export const ANOMALY_SCENES = [
   { id: 'baseline_change' as const, name: { zh: '切换对象基线例外变更风险', en: 'Baseline Exception Change Risk' } },
-  { id: 'code_shipment' as const, name: { zh: '新老编码异常发货', en: 'Abnormal Old/New Code Shipment' } },
-  { id: 'discontinued_code' as const, name: { zh: '已下架编码异常监控', en: 'Discontinued Code Monitoring' } },
 ]
 
 export const BASELINE_CHANGE_TYPES: { id: BaselineChangeType; name: { zh: string; en: string } }[] = [

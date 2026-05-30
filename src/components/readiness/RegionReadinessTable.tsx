@@ -3,26 +3,26 @@ import { useTranslation } from 'react-i18next'
 import { Pencil, Check } from 'lucide-react'
 import clsx from 'clsx'
 import { useAppStore } from '../../store/appStore'
-import { useProductReadinessStore } from '../../store/productReadinessStore'
+import { useRegionReadinessStore } from '../../store/regionReadinessStore'
 import { EditableText, NodeCell, SwitchReadinessCell, calcRowSwitchReadiness } from './readinessShared'
 import { bt } from '../../utils/helpers'
-import type { ProductCodeProgress } from '../../types'
+import type { CountryProgress } from '../../types'
 
-interface ProductReadinessTableProps {
-  data: ProductCodeProgress[]
+interface RegionReadinessTableProps {
+  data: CountryProgress[]
 }
 
-export function ProductReadinessTable({ data }: ProductReadinessTableProps) {
+export function RegionReadinessTable({ data }: RegionReadinessTableProps) {
   const { t } = useTranslation()
   const lang = useAppStore((s) => s.language)
   const role = useAppStore((s) => s.role)
-  const { columns, updateRow, updateNode } = useProductReadinessStore()
-  const [editingCode, setEditingCode] = useState<string | null>(null)
+  const { columns, updateRow, updateNode } = useRegionReadinessStore()
+  const [editingCountry, setEditingCountry] = useState<string | null>(null)
 
   const canEditRole = role === 'admin' || role === 'domain_owner'
 
-  const toggleEdit = (code: string) => {
-    setEditingCode((prev) => (prev === code ? null : code))
+  const toggleEdit = (country: string) => {
+    setEditingCountry((prev) => (prev === country ? null : country))
   }
 
   return (
@@ -32,15 +32,12 @@ export function ProductReadinessTable({ data }: ProductReadinessTableProps) {
           <thead>
             <tr className="bg-slate-50 text-left">
               <th className="px-3 py-2 font-medium text-slate-600 whitespace-nowrap sticky left-0 z-10 bg-slate-50 border-r border-slate-100">
-                {t('readiness.industry')}
+                {t('readiness.office')}
               </th>
-              <th className="px-3 py-2 font-medium text-slate-600 whitespace-nowrap sticky left-[88px] z-10 bg-slate-50 border-r border-slate-100">
-                {t('readiness.code')}
+              <th className="px-3 py-2 font-medium text-slate-600 whitespace-nowrap sticky left-[100px] z-10 bg-slate-50 border-r border-slate-100">
+                {t('readiness.country')}
               </th>
-              <th className="px-3 py-2 font-medium text-slate-600 whitespace-nowrap sticky left-[200px] z-10 bg-slate-50 border-r border-slate-100">
-                {t('readiness.description')}
-              </th>
-              <th className="px-3 py-2 font-medium text-slate-600 whitespace-nowrap sticky left-[320px] z-10 bg-slate-50 border-r border-slate-200 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.06)]">
+              <th className="px-3 py-2 font-medium text-slate-600 whitespace-nowrap sticky left-[180px] z-10 bg-slate-50 border-r border-slate-200 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.06)]">
                 {t('readiness.switchReadiness')}
               </th>
               {columns.map((col) => (
@@ -58,16 +55,16 @@ export function ProductReadinessTable({ data }: ProductReadinessTableProps) {
           <tbody>
             {data.length === 0 ? (
               <tr>
-                <td colSpan={4 + columns.length + (canEditRole ? 1 : 0)} className="px-4 py-8 text-center text-slate-400">
+                <td colSpan={3 + columns.length + (canEditRole ? 1 : 0)} className="px-4 py-8 text-center text-slate-400">
                   {t('common.noData')}
                 </td>
               </tr>
             ) : (
               data.map((row) => {
-                const isEditing = editingCode === row.code
+                const isEditing = editingCountry === row.country
                 return (
                   <tr
-                    key={row.code}
+                    key={row.country}
                     className={clsx(
                       'border-t border-slate-100',
                       isEditing ? 'bg-primary-50/40' : 'hover:bg-slate-50/50',
@@ -75,30 +72,19 @@ export function ProductReadinessTable({ data }: ProductReadinessTableProps) {
                   >
                     <td className="px-3 py-2 sticky left-0 z-[1] bg-inherit border-r border-slate-100">
                       <EditableText
-                        value={row.industry}
+                        value={row.office}
                         editing={isEditing && canEditRole}
-                        onSave={(v) => updateRow(row.code, { industry: v })}
+                        onSave={(v) => updateRow(row.country, { office: v })}
                       />
                     </td>
-                    <td className="px-3 py-2 sticky left-[88px] z-[1] bg-inherit border-r border-slate-100 font-mono text-xs">
+                    <td className="px-3 py-2 sticky left-[100px] z-[1] bg-inherit border-r border-slate-100">
                       <EditableText
-                        value={row.code}
+                        value={row.country}
                         editing={isEditing && canEditRole && role === 'admin'}
-                        onSave={(v) => updateRow(row.code, { code: v })}
+                        onSave={(v) => updateRow(row.country, { country: v })}
                       />
                     </td>
-                    <td className="px-3 py-2 sticky left-[200px] z-[1] bg-inherit border-r border-slate-100">
-                      <EditableText
-                        value={bt(row.description, lang)}
-                        editing={isEditing && canEditRole}
-                        onSave={(v) =>
-                          updateRow(row.code, {
-                            description: { ...row.description, [lang]: v },
-                          })
-                        }
-                      />
-                    </td>
-                    <td className="px-3 py-2 sticky left-[320px] z-[1] bg-inherit border-r border-slate-200 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.06)]">
+                    <td className="px-3 py-2 sticky left-[180px] z-[1] bg-inherit border-r border-slate-200 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.06)]">
                       <SwitchReadinessCell value={calcRowSwitchReadiness(row.nodes)} />
                     </td>
                     {columns.map((col) => {
@@ -108,7 +94,7 @@ export function ProductReadinessTable({ data }: ProductReadinessTableProps) {
                           <NodeCell
                             node={node}
                             editing={isEditing && canEditRole}
-                            onUpdate={(patch) => updateNode(row.code, col.id, patch)}
+                            onUpdate={(patch) => updateNode(row.country, col.id, patch)}
                             t={t}
                           />
                         </td>
@@ -118,7 +104,7 @@ export function ProductReadinessTable({ data }: ProductReadinessTableProps) {
                       <td className="px-3 py-2 sticky right-0 z-[1] bg-inherit border-l border-slate-200 text-center">
                         <button
                           type="button"
-                          onClick={() => toggleEdit(row.code)}
+                          onClick={() => toggleEdit(row.country)}
                           title={isEditing ? t('readiness.finishEdit') : t('common.actions')}
                           className={clsx(
                             'p-1.5 rounded-lg transition-colors',
