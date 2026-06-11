@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Settings, Plus, Upload } from 'lucide-react'
-import { ANOMALY_SCENES } from '../../config/regulations'
 import { useAppStore } from '../../store/appStore'
 import { useAnomalyStore } from '../../store/anomalyStore'
 import { BaselineChangeTable } from '../../components/anomaly/BaselineChangeTable'
@@ -24,7 +23,6 @@ export default function AnomalyRisk() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-slate-900">{t('nav.anomalyRisk')}</h2>
-          <p className="text-sm text-slate-500 mt-0.5">{ANOMALY_SCENES[0].name[lang]}</p>
         </div>
         <div className="flex items-center gap-2">
           {role === 'admin' && (

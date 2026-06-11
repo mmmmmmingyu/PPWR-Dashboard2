@@ -128,3 +128,73 @@ export interface AgentMessage {
   chart?: { type: 'bar' | 'line'; data: { name: string; value: number }[] }
   timestamp: Date
 }
+
+/** 流程首页 — 主流程段 */
+export interface ProcessStage {
+  id: string
+  name: BilingualText
+  order: number
+}
+
+/** 流程首页 — 子流程段 */
+export interface ProcessSubPhase {
+  id: string
+  stageId: string
+  name: BilingualText
+  order: number
+}
+
+/** 流程首页 — 流程角色 */
+export interface ProcessRole {
+  id: string
+  name: BilingualText
+  order: number
+}
+
+/** 流程首页 — 流程活动 */
+export interface ProcessActivity {
+  id: string
+  subPhaseId: string
+  roleId: string
+  num: string
+  title: BilingualText
+  highlight?: boolean
+  sortOrder: number
+}
+
+/** 流程首页 — 活动顺序连接 */
+export interface ProcessConnection {
+  id: string
+  fromActivityId: string
+  toActivityId: string
+}
+
+/** 流程首页 — 导航蒙板（锚定于流程网格：子流程段列 × 角色行） */
+export interface ProcessOverlay {
+  id: string
+  label: BilingualText
+  menuPath: string
+  subPhaseStartId: string
+  subPhaseEndId: string
+  roleStartId: string
+  roleEndId: string
+  coverStageRow?: boolean
+  coverSubPhaseRow?: boolean
+  padTop?: number
+  padRight?: number
+  padBottom?: number
+  padLeft?: number
+  /** 是否在首页展示（配置时可隐藏单个蒙板） */
+  visible?: boolean
+}
+
+export interface ProcessFlowConfig {
+  startLabel: BilingualText
+  stages: ProcessStage[]
+  subPhases: ProcessSubPhase[]
+  roles: ProcessRole[]
+  activities: ProcessActivity[]
+  connections: ProcessConnection[]
+  overlays: ProcessOverlay[]
+}
+

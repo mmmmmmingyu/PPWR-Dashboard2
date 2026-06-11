@@ -1,21 +1,24 @@
+import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../../store/appStore'
 import { REGULATIONS } from '../../config/regulations'
-import { Globe, ChevronDown } from 'lucide-react'
+import { Globe, ChevronDown, Home } from 'lucide-react'
 import { useState } from 'react'
 import i18n from '../../i18n'
 
 export function Header() {
   const { t } = useTranslation()
+  const location = useLocation()
   const { regulation, language, role, setRegulation, setLanguage, setRole } = useAppStore()
   const [regOpen, setRegOpen] = useState(false)
 
   const currentReg = REGULATIONS.find((r) => r.id === regulation)!
+  const showHomeLink = location.pathname !== '/'
 
   return (
     <header className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-800 flex items-center justify-center">
             <span className="text-white text-xs font-bold">HC</span>
           </div>
@@ -23,7 +26,17 @@ export function Header() {
             <h1 className="text-sm font-semibold text-slate-900 leading-tight">{t('app.title')}</h1>
             <p className="text-[10px] text-slate-400 leading-tight">{t('app.subtitle')}</p>
           </div>
-        </div>
+        </Link>
+
+        {showHomeLink && (
+          <Link
+            to="/"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-700 hover:border-primary-200 transition-colors"
+          >
+            <Home size={14} />
+            {t('home.backToHome')}
+          </Link>
+        )}
 
         <div className="relative ml-4">
           <button
