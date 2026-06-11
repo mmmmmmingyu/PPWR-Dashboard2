@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState, type ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, RotateCcw, Save, ChevronUp, ChevronDown } from 'lucide-react'
+import { Plus, Trash2, RotateCcw, Save, ChevronUp, ChevronDown, Download, Upload } from 'lucide-react'
 import clsx from 'clsx'
 import { NAV_MENU_OPTIONS } from '../../config/navMenus'
 import { useAppStore } from '../../store/appStore'
@@ -63,6 +63,9 @@ export function ProcessFlowConfigPanel({ onClose }: { onClose: () => void }) {
   const [connFrom, setConnFrom] = useState('')
   const [connTo, setConnTo] = useState('')
   const [saveTip, setSaveTip] = useState(false)
+  const [importTip, setImportTip] = useState<'ok' | 'err' | null>(null)
+  const [importError, setImportError] = useState('')
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   const stages = sortedStages(store.stages)
   const roleList = sortedRoles(store.roles)
@@ -73,6 +76,33 @@ export function ProcessFlowConfigPanel({ onClose }: { onClose: () => void }) {
     store.saveConfig()
     setSaveTip(true)
     window.setTimeout(() => setSaveTip(false), 2000)
+  }
+
+  const handleExport = () => {
+    store.exportConfig()
+  }
+
+  const handleImportClick = () => {
+    importInputRef.current?.click()
+  }
+
+  const handleImportFile = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (!window.confirm(t('processFlow.importConfirm'))) return
+
+    const result = await store.importConfig(file)
+    if (result.ok) {
+      setImportError('')
+      setImportTip('ok')
+      setSelectedOverlayId(null)
+      window.setTimeout(() => setImportTip(null), 3000)
+      return
+    }
+    setImportError(result.message)
+    setImportTip('err')
+    window.setTimeout(() => setImportTip(null), 4000)
   }
 
   return (
@@ -86,11 +116,42 @@ export function ProcessFlowConfigPanel({ onClose }: { onClose: () => void }) {
           {saveTip && (
             <span className="text-xs text-primary-600">{t('processFlow.savedOk')}</span>
           )}
+          {importTip === 'ok' && (
+            <span className="text-xs text-primary-600">{t('processFlow.importOk')}</span>
+          )}
+          {importTip === 'err' && (
+            <span className="text-xs text-red-600" title={importError}>
+              {t('processFlow.importFailed', { message: importError })}
+            </span>
+          )}
           {store.lastSavedAt && (
             <span className="text-[10px] text-slate-400 hidden sm:inline">
               {t('processFlow.lastSaved')}: {new Date(store.lastSavedAt).toLocaleString()}
             </span>
           )}
+          <button
+            type="button"
+            onClick={handleExport}
+            className="flex items-center gap-1 px-3 py-1.5 text-xs border border-slate-200 rounded-lg hover:bg-slate-50"
+          >
+            <Download size={12} />
+            {t('processFlow.exportConfig')}
+          </button>
+          <button
+            type="button"
+            onClick={handleImportClick}
+            className="flex items-center gap-1 px-3 py-1.5 text-xs border border-slate-200 rounded-lg hover:bg-slate-50"
+          >
+            <Upload size={12} />
+            {t('processFlow.importConfig')}
+          </button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={handleImportFile}
+          />
           <button
             type="button"
             onClick={handleSave}

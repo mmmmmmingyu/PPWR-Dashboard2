@@ -11,8 +11,11 @@ import type {
 } from '../types'
 import {
   cloneProcessFlowConfig,
+  downloadProcessFlowConfig,
+  extractProcessFlowConfigFromImport,
   loadProcessFlowConfig,
   pickProcessFlowConfig,
+  ProcessFlowImportError,
   saveProcessFlowConfig,
   syncSeqFromConfig,
 } from './processFlowPersistence'
@@ -29,6 +32,8 @@ interface ProcessFlowState extends ProcessFlowConfig {
   setStartLabel: (label: ProcessFlowConfig['startLabel']) => void
   resetToDefault: () => void
   saveConfig: () => void
+  exportConfig: () => void
+  importConfig: (file: File) => Promise<{ ok: true } | { ok: false; message: string }>
 
   addStage: (stage: Omit<ProcessStage, 'id'>) => string
   updateStage: (id: string, patch: Partial<ProcessStage>) => void
@@ -74,6 +79,29 @@ export const useProcessFlowStore = create<ProcessFlowState>((set, get) => ({
     const at = new Date().toISOString()
     localStorage.setItem('ppwr-process-flow-saved-at', at)
     set({ lastSavedAt: at })
+  },
+
+  exportConfig: () => {
+    downloadProcessFlowConfig(pickProcessFlowConfig(get()))
+  },
+
+  importConfig: async (file) => {
+    try {
+      const text = await file.text()
+      const parsed = JSON.parse(text) as unknown
+      const config = extractProcessFlowConfigFromImport(parsed)
+      seq = syncSeqFromConfig(config)
+      set({ ...cloneProcessFlowConfig(config), lastSavedAt: null })
+      return { ok: true }
+    } catch (err) {
+      if (err instanceof ProcessFlowImportError) {
+        return { ok: false, message: err.message }
+      }
+      if (err instanceof SyntaxError) {
+        return { ok: false, message: 'JSON 解析失败' }
+      }
+      return { ok: false, message: '导入失败' }
+    }
   },
 
   addStage: (stage) => {
